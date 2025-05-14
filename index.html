@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruchomy Kwadrat w Ramce</title>
+    <style>
+      #container {
+        width: calc(100vw - 60px);
+        height: calc(100vh - 60px);
+        border: 2px solid black;
+        position: relative;
+        margin: 20px;
+        overflow: hidden;
+      }
+
+      #square {
+        width: 50px;
+        height: 50px;
+        background-color: transparent;
+        background-image: url(/img/knight1-r.png);
+        background-size: cover;
+        position: absolute;
+        top: 100px;
+        left: 100px;
+        image-rendering: pixelated;
+        z-index: 1;
+      }
+
+      #start-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px 40px;
+        background-color: lightgray;
+        border: 2px solid gray;
+        border-radius: 5px;
+        font-size: 24px;
+        cursor: default;
+        user-select: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+      }
+
+      #start-button.active {
+        background-color: darkgray;
+        border-color: black;
+      }
+
+      #start-button.pressed {
+        background-color: #555;
+        border-color: black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="square"></div>
+      <div id="start-button">Start</div>
+    </div>
+    <script src="moving.js"></script>
+  </body>
+</html>
