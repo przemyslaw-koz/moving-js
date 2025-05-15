@@ -7,6 +7,8 @@ services:
         container_name: webapp
         expose:
             - "80"
+        ports:
+            - "8080:80"
 
     proxy:
         image: nginx:stable-alpine
