@@ -135,5 +135,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-/img/0x72*
-/img/Tiny RPG*
+app/img/0x72*
+app/img/Tiny RPG*
