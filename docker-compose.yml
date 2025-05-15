@@ -11,7 +11,7 @@ services:
     image: nginx:stable-alpine
     container_name: nginx-proxy
     ports:
-      - "80:80"
+      - "8888:80"
     volumes:
       - ./reverse-proxy:/etc/nginx/conf.d
     depends_on:
