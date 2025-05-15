@@ -13,6 +13,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./reverse-proxy:/etc/nginx/conf.d:ro
+      - ./reverse-proxy:/etc/nginx/conf.d
     depends_on:
       - app
+
