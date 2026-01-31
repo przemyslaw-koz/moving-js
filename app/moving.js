@@ -1,3 +1,8 @@
+let gameStarted = false;
+let score = 0;
+
+const treasureEl = document.getElementById("treasure");
+const scoreEl = document.getElementById("score");
 const container = document.getElementById("container");
 const square = document.getElementById("square");
 const startButton = document.getElementById("start-button");
@@ -86,7 +91,10 @@ document.addEventListener("keydown", (event) => {
         console.log("Przycisk Start został naciśnięty!");
         setTimeout(() => {
           startButton.classList.remove("pressed");
+          startButton.remove();
+	  startGame();
         }, 200);
+	
       }
       break;
   }
@@ -136,3 +144,24 @@ const animateMovement = (hero) => (direction) => {
 
   return newHero;
 };
+
+const startGame = () => {
+  console.log("gra zaczęta!");
+  gameStarted = true;
+  score = 0;
+  scoreEl.textContext = score;
+
+  showTreasure();
+}
+
+const showTreasure = () => {
+  console.log("pokazał się skarb!");
+}
+
+const isTreasureColliding = () => {
+  
+}
+
+const checkTreasureCollision = () => {
+  
+}

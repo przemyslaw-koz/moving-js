@@ -5,7 +5,7 @@ services:
     build: ./app
     container_name: static-app
     ports:
-      - "8080:80"
+      - "8087:80"
 
   reverse-proxy:
     image: nginx:stable-alpine
