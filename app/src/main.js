@@ -1,6 +1,8 @@
 import { getDom } from "./dom.js";
 import { createInitialState, GAME_STATES, resetState } from "./state.js";
 import { renderHUD } from "./ui/hud.js";
+import { showOverlay } from "./ui/overlay.js";
+import { bindHudButtons } from "./ui/buttons.js";
 
 const dom = getDom();
 const {
@@ -12,9 +14,6 @@ const {
   squareEl,
   startBtn,
   bgmEl,
-  overlayEl,
-  overlayTitleEl,
-  overlayTextEl,
   restartBtn,
   muteBtn,
 } = dom;
@@ -110,17 +109,6 @@ function playCoinSound() {
 }
 
 // ---- UI / STATE ----
-
-function showOverlay(title, text) {
-  if (overlayTitleEl) overlayTitleEl.textContent = title;
-  if (overlayTextEl) overlayTextEl.textContent = text;
-  if (overlayEl) overlayEl.classList.remove("hidden");
-}
-
-function hideOverlay() {
-  if (overlayEl) overlayEl.classList.add("hidden");
-}
-
 function startBgm() {
   if (!bgmEl) return;
   bgmEl.volume = 0.35;
@@ -225,7 +213,7 @@ function restartGame() {
   enemy.tick = 0;
 
   // UI + audio
-  hideOverlay();
+  hideOverlay(dom);
   startBgm();
   playStartSound();
   renderHUD(state, dom);
@@ -252,7 +240,7 @@ function gameOver() {
   state.treasureCollecting = true;
   stopBgm();
   stopEnemyLoop();
-  showOverlay("GAME OVER", `Wynik: ${state.score}. Enter = restart`);
+  showOverlay(dom, "GAME OVER", `Wynik: ${state.score}. Enter = restart`);
 }
 
 const hero = {
@@ -263,7 +251,6 @@ const hero = {
 };
 
 let bgImg = window.getComputedStyle(squareEl).backgroundImage;
-let isButtonActive = false;
 
 const changeImage = (hero) => (currentBackgroundImage) => {
   const imageUrl = currentBackgroundImage.substring(
@@ -284,31 +271,17 @@ const changeImage = (hero) => (currentBackgroundImage) => {
   return newBgImg;
 };
 
-const checkIfOnButton = () => {
-  const squareRect = squareEl.getBoundingClientRect();
-  const buttonRect = startBtn.getBoundingClientRect();
-
-  return !(
-    squareRect.right < buttonRect.left ||
-    squareRect.left > buttonRect.right ||
-    squareRect.bottom < buttonRect.top ||
-    squareRect.top > buttonRect.bottom
-  );
-};
-
 // HUD buttons
-if (restartBtn) {
-  restartBtn.addEventListener("click", () => restartGame());
-}
-if (muteBtn) {
-  muteBtn.addEventListener("click", () => {
-    if (bgmEl) bgmEl.muted = !bgmEl.muted;
-  });
-}
+bindHudButtons(dom, {
+  onRestart: () => restartGame(),
+  onToggleMute: () => {
+    if (dom.bgmEl) dom.bgmEl.muted = !dom.bgmEl.muted;
+  },
+});
 
 // Initial screen
 renderHUD(state, dom);
-showOverlay("Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
+showOverlay(dom, "Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
 
 document.addEventListener("keydown", (event) => {
   let newX = hero.xPosition;
