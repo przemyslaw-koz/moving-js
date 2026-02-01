@@ -7,19 +7,17 @@ import { initEnemy, renderEnemySprite } from "../entities/enemy.js";
 import { placeEnemyRandom } from "../systems/enemyAI.js";
 import { tryMoveHero, measureMoveBounds } from "../systems/movement.js";
 
-import { playStartSound } from "../audio/sfx.js";
-import { startBgm, stopBgm, toggleMute, changeVolume } from "../audio/bgm.js";
-
 import { INPUT_ACTIONS } from "../systems/input.js";
 import {
   renderHeroSprite,
   renderHeroPosition,
   stepHeroAnimation,
 } from "../entities/hero.js";
+import { toggleMute } from "../audio/bgm.js";
 
 export const createGameActions = ({ ctx, gameLoop }) => {
-  const { dom, state, hero, enemy, enemySprite, getSafeTop } = ctx;
-  const { treasureEl, enemyEl, squareEl, containerEl, bgmEl } = dom;
+  const { dom, state, hero, enemy, enemySprite, getSafeTop, audio } = ctx;
+  const { treasureEl, enemyEl, squareEl, containerEl } = dom;
 
   const heroSpriteCache = { baseDir: "", lastBg: "" };
 
@@ -56,13 +54,13 @@ export const createGameActions = ({ ctx, gameLoop }) => {
   const handleAudio = (action) => {
     switch (action.type) {
       case INPUT_ACTIONS.TOGGLE_MUTE:
-        toggleMute(bgmEl);
+        audio.toggleMute();
         return true;
       case INPUT_ACTIONS.VOLUME_UP:
-        changeVolume(bgmEl, 0.05);
+        audio.changeVolume(0.05);
         return true;
       case INPUT_ACTIONS.VOLUME_DOWN:
-        changeVolume(bgmEl, -0.05);
+        audio.changeVolume(-0.05);
         return true;
       default:
         return false;
@@ -78,8 +76,8 @@ export const createGameActions = ({ ctx, gameLoop }) => {
     initEnemy(enemy);
 
     hideOverlay(dom);
-    startBgm(bgmEl);
-    playStartSound();
+    audio.startBgm();
+    audio.playStart();
     renderHUD(state, dom);
 
     treasureEl.classList.add("hidden");
@@ -97,7 +95,7 @@ export const createGameActions = ({ ctx, gameLoop }) => {
   const gameOver = () => {
     state.gameState = GAME_STATES.GAMEOVER;
     state.treasureCollecting = true;
-    stopBgm(bgmEl);
+    audio.stopBgm();
     gameLoop.stop();
 
     if (enemyEl) enemyEl.classList.add("invisible");

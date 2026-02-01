@@ -6,7 +6,7 @@ import { bindHudButtons } from "./ui/buttons.js";
 import { keyToAction } from "./systems/input.js";
 import { createGameLoop } from "./loop/gameLoop.js";
 import { createTick } from "./loop/tick.js";
-import { playCoinSound } from "./audio/sfx.js";
+import { createAudio } from "./audio/facade.js";
 
 import { createContext } from "./game/context.js";
 import { createGameActions } from "./game/actions.js";
@@ -25,6 +25,7 @@ const ENEMY_SPRITE = {
 
 const enemy = createEnemy();
 const hero = createHero();
+const audio = createAudio(dom);
 const ctx = createContext({
   dom,
   state,
@@ -32,6 +33,7 @@ const ctx = createContext({
   enemy,
   enemySprite: ENEMY_SPRITE,
   step,
+  audio,
 });
 
 let actions;
@@ -44,7 +46,7 @@ const tick = createTick({
   getSafeTop: ctx.getSafeTop,
   enemySprite: ENEMY_SPRITE,
   onGameOver: () => actions.gameOver(),
-  onTreasureCollect: () => playCoinSound(),
+  onTreasureCollect: () => ctx.audio.playCoin(),
 });
 
 const gameLoop = createGameLoop({

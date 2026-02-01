@@ -1,4 +1,4 @@
-export const createContext = ({ dom, state, hero, enemy, enemySprite, step }) => {
+export const createContext = ({ dom, state, hero, enemy, enemySprite, step, audio }) => {
   const { hudEl } = dom;
 
   const getSafeTop = () => {
@@ -13,6 +13,7 @@ export const createContext = ({ dom, state, hero, enemy, enemySprite, step }) =>
     enemy,
     enemySprite,
     step,
+    audio,
     getSafeTop,
   };
 };
