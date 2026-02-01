@@ -13,3 +13,9 @@ export const createInitialState = () => {
     invincibleUntil:0, //for enemy collision
   };
 };
+
+export const resetState = (state) =>{
+const freshState=createInitialState();
+	Object.assign(state, freshState);
+	return state;
+}
