@@ -3,7 +3,7 @@ let treasureCollecting = false;
 let lives = 3;
 let gameState = "menu"; // "menu" | "playing" | "gameover"
 
-onst step = 10;
+const step = 10;
 
 //
 // Enemy state
