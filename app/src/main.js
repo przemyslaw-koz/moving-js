@@ -9,6 +9,7 @@ import { handleEnemyCollision } from "./entities/enemy.js";
 import { moveEnemyTick, placeEnemyRandom } from "./systems/enemyAI.js";
 import { tryMoveHero } from "./systems/movement.js";
 import { keyToAction, INPUT_ACTIONS } from "./systems/input.js";
+import { changeVolume, startBgm, stopBgm, toggleMute } from "./audio/bgm.js";
 
 const dom = getDom();
 const { flashEl, treasureEl, enemyEl, hudEl, containerEl, squareEl, bgmEl } =
@@ -30,19 +31,6 @@ const enemy = {
 
 const ENEMY_FRAME_SIZE = 48; // px (taki jak #enemy width/height)
 const ENEMY_FRAMES_PER_ROW = 4;
-
-// ---- UI / STATE ----
-function startBgm() {
-  if (!bgmEl) return;
-  bgmEl.volume = 0.35;
-  bgmEl.play().catch(() => {});
-}
-
-function stopBgm() {
-  if (!bgmEl) return;
-  bgmEl.pause();
-  bgmEl.currentTime = 0;
-}
 
 const getSafeTop = () => {
   // obszar pod HUD, gdzie nie spawnujemy skarbów/potworów
@@ -119,7 +107,7 @@ function restartGame() {
 
   // UI + audio
   hideOverlay(dom);
-  startBgm();
+  startBgm(bgmEl);
   playStartSound();
   renderHUD(state, dom);
 
@@ -143,7 +131,7 @@ function restartGame() {
 function gameOver() {
   state.gameState = GAME_STATES.GAMEOVER;
   state.treasureCollecting = true;
-  stopBgm();
+  stopBgm(bgmEl);
   stopEnemyLoop();
   showOverlay(dom, "GAME OVER", `Wynik: ${state.score}. Enter = restart`);
 }
@@ -179,9 +167,7 @@ const changeImage = (hero) => (currentBackgroundImage) => {
 // HUD buttons
 bindHudButtons(dom, {
   onRestart: () => restartGame(),
-  onToggleMute: () => {
-    if (dom.bgmEl) dom.bgmEl.muted = !dom.bgmEl.muted;
-  },
+  onToggleMute: () => toggleMute(bgmEl),
 });
 
 // Initial screen
@@ -198,11 +184,11 @@ document.addEventListener("keydown", (event) => {
       return;
 
     case INPUT_ACTIONS.VOLUME_UP:
-      if (bgmEl) bgmEl.volume = Math.min(1, bgmEl.volume + 0.05);
+      changeVolume(bgmEl, 0.05);
       return;
 
     case INPUT_ACTIONS.VOLUME_DOWN:
-      if (bgmEl) bgmEl.volume = Math.max(0, bgmEl.volume - 0.05);
+      changeVolume(bgmEl, -0.05);
       return;
 
     case INPUT_ACTIONS.START:
