@@ -9,7 +9,7 @@ const {
   livesEl,
   enemyEl,
   hudEl,
-  container,
+  containerEl,
   squareEl,
   startBtn,
   bgmEl,
@@ -125,7 +125,7 @@ function getSafeTop() {
 
 function placeEnemyRandom() {
   if (!enemyEl) return;
-  const containerRect = container.getBoundingClientRect();
+  const containerRect = containerEl.getBoundingClientRect();
   const safeTop = getSafeTop();
   const w = enemyEl.offsetWidth || 48;
   const h = enemyEl.offsetHeight || 48;
@@ -174,7 +174,7 @@ function updateEnemySprite(row) {
 
 function moveEnemyTick() {
   if (!enemyEl) return;
-  const containerRect = container.getBoundingClientRect();
+  const containerRect = containerEl.getBoundingClientRect();
   const w = enemyEl.offsetWidth || 48;
   const h = enemyEl.offsetHeight || 48;
   const safeTop = getSafeTop();
@@ -303,7 +303,7 @@ showOverlay("Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
 document.addEventListener("keydown", (event) => {
   let newX = hero.xPosition;
   let newY = hero.yPosition;
-  const containerRect = container.getBoundingClientRect();
+  const containerRect = containerEl.getBoundingClientRect();
   const squareRect = squareEl.getBoundingClientRect();
 
   const moveHero = animateMovement(hero);
@@ -396,7 +396,7 @@ const animateMovement = (hero) => (direction) => {
 const showTreasure = () => {
   console.log("pokazał się skarb!");
   
-  const containerRect = container.getBoundingClientRect();
+  const containerRect = containerEl.getBoundingClientRect();
   const size = 32;
   const safeTop = getSafeTop();
 
