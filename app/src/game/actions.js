@@ -2,12 +2,12 @@ import { GAME_STATES, resetState } from "../state.js";
 import { renderHUD } from "../ui/hud.js";
 import { showOverlay, hideOverlay } from "../ui/overlay.js";
 
-import { showTreasure, checkTreasureCollision } from "../entities/treasure.js";
+import { showTreasure } from "../entities/treasure.js";
 import { initEnemy, renderEnemySprite } from "../entities/enemy.js";
 import { placeEnemyRandom } from "../systems/enemyAI.js";
 import { tryMoveHero, measureMoveBounds } from "../systems/movement.js";
 
-import { playStartSound, playCoinSound } from "../audio/sfx.js";
+import { playStartSound } from "../audio/sfx.js";
 import { startBgm, stopBgm, toggleMute, changeVolume } from "../audio/bgm.js";
 
 import { INPUT_ACTIONS } from "../systems/input.js";
@@ -42,14 +42,6 @@ export const createGameActions = ({ ctx, gameLoop }) => {
     });
 
     if (moved) renderHeroPosition(squareEl, hero);
-
-    // collisions treasure (na razie zostaje tu; później przeniesiemy do ticka)
-    checkTreasureCollision(state, dom, getSafeTop, {
-      onCollect: () => {
-        renderHUD(state, dom);
-        playCoinSound();
-      },
-    });
   };
 
   const handleStart = () => {

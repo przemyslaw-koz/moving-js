@@ -6,10 +6,12 @@ import { bindHudButtons } from "./ui/buttons.js";
 import { keyToAction } from "./systems/input.js";
 import { createGameLoop } from "./loop/gameLoop.js";
 import { createTick } from "./loop/tick.js";
+import { playCoinSound } from "./audio/sfx.js";
 
 import { createContext } from "./game/context.js";
 import { createGameActions } from "./game/actions.js";
 import { createHero } from "./entities/hero.js";
+import { createEnemy } from "./entities/enemy.js";
 
 const dom = getDom();
 const state = createInitialState();
@@ -21,17 +23,8 @@ const ENEMY_SPRITE = {
   tickModulo: 3,
 };
 
-const enemy = {
-  x: 300,
-  y: 200,
-  speed: 3, // px per tick (50ms) ~ 60px/s
-  frame: 0, // 0..3
-  row: 0, // 0..2 (wiersz w spritesheet)
-  tick: 0, // do animacji (spowolnienie klatek)
-};
-
+const enemy = createEnemy();
 const hero = createHero();
-
 const ctx = createContext({
   dom,
   state,
@@ -51,6 +44,7 @@ const tick = createTick({
   getSafeTop: ctx.getSafeTop,
   enemySprite: ENEMY_SPRITE,
   onGameOver: () => actions.gameOver(),
+  onTreasureCollect: () => playCoinSound(),
 });
 
 const gameLoop = createGameLoop({

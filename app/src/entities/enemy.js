@@ -8,13 +8,15 @@ export const initEnemy = (enemy) => {
   enemy.tick = 0;
 };
 
-/**
- * row: wiersz spritesheet (np. 0 idle, 1 move)
- * config:
- *  - frameSize: px (szer./wys. klatki)
- *  - framesPerRow: liczba klatek w wierszu
- *  - tickModulo: co ile ticków zmieniać klatkę (im mniejsze, tym szybciej)
- */
+export const createEnemy = () => ({
+  x: 300,
+  y: 200,
+  speed: 3,
+  frame: 0,
+  row: 0,
+  tick: 0,
+});
+
 export const renderEnemySprite = (
   enemyEl,
   enemy,

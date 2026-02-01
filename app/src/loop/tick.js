@@ -1,7 +1,7 @@
-// app/src/loop/tick.js
 import { moveEnemyTick } from "../systems/enemyAI.js";
 import { handleEnemyCollision, renderEnemySprite } from "../entities/enemy.js";
 import { renderHUD } from "../ui/hud.js";
+import { checkTreasureCollision } from "../entities/treasure.js";
 
 export const createTick = ({
   dom,
@@ -11,6 +11,7 @@ export const createTick = ({
   getSafeTop,
   enemySprite,
   onGameOver,
+  onTreasureCollect,
 }) => {
   const { squareEl, enemyEl, flashEl } = dom;
 
@@ -41,6 +42,13 @@ export const createTick = ({
       heroEl: squareEl,
       onHit: flashHitFx,
       onDeath: onGameOver,
+    });
+
+    checkTreasureCollision(state, dom, getSafeTop, {
+      onCollect: () => {
+        renderHUD(state, dom);
+        onTreasureCollect?.();
+      },
     });
   };
 };
