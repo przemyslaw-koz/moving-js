@@ -184,7 +184,7 @@ bindHudButtons(dom, {
 
 // Initial screen
 renderHUD(state, dom);
-showOverlay(dom, "Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
+showOverlay(dom, "Pixel Przygoda", "Wciśnij Enter, aby zacząć.");
 
 document.addEventListener("keydown", (event) => {
   const action = keyToAction(event.key, step);
