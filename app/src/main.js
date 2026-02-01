@@ -187,81 +187,71 @@ renderHUD(state, dom);
 showOverlay(dom, "Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
 
 document.addEventListener("keydown", (event) => {
-  let newX = hero.xPosition;
-  let newY = hero.yPosition;
-  const containerRect = containerEl.getBoundingClientRect();
-  const squareRect = squareEl.getBoundingClientRect();
+  const action = keyToAction(event.key, step);
+  if (!action) return;
 
-  const moveHero = animateMovement(hero);
-  switch (event.key) {
-    case "ArrowLeft":
-      newX -= step;
-      const newHero1 = moveHero("l");
-      hero.step = newHero1.step;
-      hero.direction = newHero1.direction;
-      bgImg = changeImage(hero)(bgImg);
-      break;
-    case "ArrowRight":
-      newX += step;
-      const newHero = moveHero("r");
-      hero.step = newHero.step;
-      hero.direction = newHero.direction;
-      bgImg = changeImage(hero)(bgImg);
-      break;
-    case "ArrowDown":
-      newY += step;
-      const newHero2 = moveHero("d");
-      hero.step = newHero2.step;
-      hero.direction = newHero2.direction;
-      bgImg = changeImage(hero)(bgImg);
-      break;
-    case "ArrowUp":
-      newY -= step;
-      const newHero3 = moveHero("u");
-      hero.step = newHero3.step;
-      hero.direction = newHero3.direction;
-      bgImg = changeImage(hero)(bgImg);
-      break;
-    case "Enter":
+  switch (action.type) {
+    case INPUT_ACTIONS.TOGGLE_MUTE:
+      if (bgmEl) bgmEl.muted = !bgmEl.muted;
+      return;
+
+    case INPUT_ACTIONS.VOLUME_UP:
+      if (bgmEl) bgmEl.volume = Math.min(1, bgmEl.volume + 0.05);
+      return;
+
+    case INPUT_ACTIONS.VOLUME_DOWN:
+      if (bgmEl) bgmEl.volume = Math.max(0, bgmEl.volume - 0.05);
+      return;
+
+    case INPUT_ACTIONS.START:
       if (
         state.gameState === GAME_STATES.MENU ||
         state.gameState === GAME_STATES.GAMEOVER
       ) {
         restartGame();
       }
-      break;
-    case "m":
-    case "M":
-      if (bgmEl) bgmEl.muted = !bgmEl.muted;
-      break;
-    case "+":
-      if (bgmEl) bgmEl.volume = Math.min(1, bgmEl.volume + 0.05);
-      break;
-    case "-":
-      if (bgmEl) bgmEl.volume = Math.max(0, bgmEl.volume - 0.05);
-      break;
+      return;
+
+    case INPUT_ACTIONS.MOVE: {
+      if (state.gameState !== GAME_STATES.PLAYING) return;
+
+      // 1) animacja / kierunek (to jeszcze zostaje tutaj – mały commit)
+      const moveHero = animateMovement(hero);
+      const next = moveHero(action.dir);
+      hero.step = next.step;
+      hero.direction = next.direction;
+      bgImg = changeImage(hero)(bgImg);
+
+      // 2) movement + bounds (to też jeszcze tu – identycznie jak było)
+      const containerRect = containerEl.getBoundingClientRect();
+      const squareRect = squareEl.getBoundingClientRect();
+
+      const newX = hero.xPosition + action.dx;
+      const newY = hero.yPosition + action.dy;
+
+      if (
+        newX >= 0 &&
+        newX <= containerRect.width - squareRect.width &&
+        newY >= 0 &&
+        newY <= containerRect.height - squareRect.height
+      ) {
+        hero.xPosition = newX;
+        hero.yPosition = newY;
+        squareEl.style.left = newX + "px";
+        squareEl.style.top = newY + "px";
+      }
+
+      // 3) po ruchu
+      checkTreasureCollision(state, dom, getSafeTop, {
+        onCollect: () => {
+          renderHUD(state, dom);
+          playCoinSound();
+        },
+      });
+
+      return;
+    }
   }
-
-  if (state.gameState !== GAME_STATES.PLAYING) return;
-
-  if (
-    newX >= 0 &&
-    newX <= containerRect.width - squareRect.width &&
-    newY >= 0 &&
-    newY <= containerRect.height - squareRect.height
-  ) {
-    hero.xPosition = newX;
-    hero.yPosition = newY;
-    squareEl.style.left = hero.xPosition + "px";
-    squareEl.style.top = hero.yPosition + "px";
-  }
-
-  checkTreasureCollision(state, dom, getSafeTop, {
-    onCollect: () => {
-      renderHUD(state, dom);
-      playCoinSound();
-    },
-  });
 });
 
 const animateMovement = (hero) => (direction) => {
