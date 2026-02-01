@@ -35,3 +35,8 @@ export const playCoinSound = () => {
     at: 0.1,
   });
 };
+
+export const playHit = () => {
+  playTone({ type: "square", freq: 180, duration: 0.08, gain: 0.12 });
+  playTone({ type: "square", freq: 120, duration: 0.1, gain: 0.1, at: 0.06 });
+};

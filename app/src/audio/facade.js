@@ -1,4 +1,4 @@
-import { playCoinSound, playStartSound } from "./sfx.js";
+import { playCoinSound, playHit, playStartSound } from "./sfx.js";
 import { startBgm, stopBgm, toggleMute, changeVolume } from "./bgm.js";
 
 export const createAudio = (dom) => {
@@ -14,5 +14,6 @@ export const createAudio = (dom) => {
     // SFX
     playStart: () => playStartSound(),
     playCoin: () => playCoinSound(),
+    playHit: () => playHit(),
   };
 };

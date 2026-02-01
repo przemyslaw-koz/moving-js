@@ -47,6 +47,7 @@ const tick = createTick({
   enemySprite: ENEMY_SPRITE,
   onGameOver: () => actions.gameOver(),
   onTreasureCollect: () => ctx.audio.playCoin(),
+  onEnemyHit: () => ctx.audio.playHit(),
 });
 
 const gameLoop = createGameLoop({
