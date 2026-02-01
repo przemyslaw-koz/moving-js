@@ -217,6 +217,7 @@ function moveEnemyTick() {
 
 function restartGame() {
   resetState(state);
+  state.gameState = GAME_STATES.PLAYING;
 
   squareEl.classList.remove("hurt");
 
