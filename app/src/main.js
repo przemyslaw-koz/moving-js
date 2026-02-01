@@ -10,6 +10,7 @@ import { moveEnemyTick, placeEnemyRandom } from "./systems/enemyAI.js";
 import { tryMoveHero } from "./systems/movement.js";
 import { keyToAction, INPUT_ACTIONS } from "./systems/input.js";
 import { changeVolume, startBgm, stopBgm, toggleMute } from "./audio/bgm.js";
+import { createGameLoop } from "./loop/gameLoop.js";
 
 const dom = getDom();
 const { flashEl, treasureEl, enemyEl, hudEl, containerEl, squareEl, bgmEl } =
@@ -95,6 +96,38 @@ function updateEnemySprite(row) {
   enemyEl.style.backgroundPosition = `${x}px ${y}px`;
 }
 
+const gameLoop = createGameLoop({
+  tickMs: 50,
+  shouldTick: () => state.gameState === GAME_STATES.PLAYING,
+  onTick: () => {
+    moveEnemyTick({
+      dom,
+      enemy,
+      hero,
+      getSafeTop,
+      onAnimate: () => updateEnemySprite(1),
+    });
+
+    handleEnemyCollision({
+      state,
+      dom,
+      heroEl: squareEl,
+      onHit: () => {
+        renderHUD(state, dom);
+
+        squareEl.classList.add("hurt");
+        setTimeout(() => squareEl.classList.remove("hurt"), 1000);
+
+        if (flashEl) {
+          flashEl.classList.add("on");
+          setTimeout(() => flashEl.classList.remove("on"), 90);
+        }
+      },
+      onDeath: () => gameOver(),
+    });
+  },
+});
+
 function restartGame() {
   resetState(state);
   state.gameState = GAME_STATES.PLAYING;
@@ -126,13 +159,15 @@ function restartGame() {
     enemyEl.style.outline = ""; // jeśli miałeś debug outline, usuń
   }
   startEnemyLoop();
+  gameLoop.start();
 }
 
 function gameOver() {
   state.gameState = GAME_STATES.GAMEOVER;
   state.treasureCollecting = true;
   stopBgm(bgmEl);
-  stopEnemyLoop();
+  gameLoop.stop();
+  if (enemyEl) enemyEl.classList.add("invisible");
   showOverlay(dom, "GAME OVER", `Wynik: ${state.score}. Enter = restart`);
 }
 
