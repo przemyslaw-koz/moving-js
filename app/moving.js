@@ -274,7 +274,7 @@ if (muteBtn) {
 
 // Initial screen
 renderHUD();
-showOverlay("Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
+showOverlay("Pixel Przygoda", "Wciśnij Enter, aby zacząć.");
 
 
 document.addEventListener("keydown", (event) => {

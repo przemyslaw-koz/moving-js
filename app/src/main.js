@@ -7,6 +7,8 @@ import { playStartSound, playCoinSound } from "./audio/sfx.js";
 import { showTreasure, checkTreasureCollision } from "./entities/treasure.js";
 import { handleEnemyCollision } from "./entities/enemy.js";
 import { moveEnemyTick, placeEnemyRandom } from "./systems/enemyAI.js";
+import { tryMoveHero } from "./systems/movement.js";
+import { keyToAction, INPUT_ACTIONS } from "./systems/input.js";
 
 const dom = getDom();
 const { flashEl, treasureEl, enemyEl, hudEl, containerEl, squareEl, bgmEl } =
@@ -222,23 +224,25 @@ document.addEventListener("keydown", (event) => {
       hero.direction = next.direction;
       bgImg = changeImage(hero)(bgImg);
 
-      // 2) movement + bounds (to też jeszcze tu – identycznie jak było)
+      // 2) movement (logic) + bounds (measure once here)
       const containerRect = containerEl.getBoundingClientRect();
       const squareRect = squareEl.getBoundingClientRect();
 
-      const newX = hero.xPosition + action.dx;
-      const newY = hero.yPosition + action.dy;
+      const moved = tryMoveHero({
+        hero,
+        dx: action.dx,
+        dy: action.dy,
+        bounds: {
+          width: containerRect.width,
+          height: containerRect.height,
+          heroWidth: squareRect.width,
+          heroHeight: squareRect.height,
+        },
+      });
 
-      if (
-        newX >= 0 &&
-        newX <= containerRect.width - squareRect.width &&
-        newY >= 0 &&
-        newY <= containerRect.height - squareRect.height
-      ) {
-        hero.xPosition = newX;
-        hero.yPosition = newY;
-        squareEl.style.left = newX + "px";
-        squareEl.style.top = newY + "px";
+      if (moved) {
+        squareEl.style.left = hero.xPosition + "px";
+        squareEl.style.top = hero.yPosition + "px";
       }
 
       // 3) po ruchu

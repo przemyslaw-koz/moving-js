@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -39,7 +39,9 @@
         font-size: 20px;
         cursor: default;
         user-select: none;
-        transition: background-color 0.2s ease, border-color 0.2s ease;
+        transition:
+          background-color 0.2s ease,
+          border-color 0.2s ease;
       }
 
       #start-button.active {
@@ -100,8 +102,7 @@
         transform: translateY(1px);
       }
 
-
-      #treasure{
+      #treasure {
         width: 32px;
         height: 32px;
         position: absolute;
@@ -112,12 +113,16 @@
         z-index: 1;
       }
 
-      .hidden{ display:none; }
-      .invisible { visibility: hidden; }
+      .hidden {
+        display: none;
+      }
+      .invisible {
+        visibility: hidden;
+      }
 
-      #enemy{
-        width: 48px;               /* 24px * 2 (skala x2) */
-        height: 48px;              /* 24px * 2 */
+      #enemy {
+        width: 48px; /* 24px * 2 (skala x2) */
+        height: 48px; /* 24px * 2 */
         position: absolute;
 
         background-image: url(/img/slime_green.png);
@@ -137,14 +142,24 @@
       }
 
       @keyframes enemyWalk {
-        from { background-position-x: 0%; }
-        to   { background-position-x: -300%; } /* 4 klatki => 0, -100, -200, -300 */
+        from {
+          background-position-x: 0%;
+        }
+        to {
+          background-position-x: -300%;
+        } /* 4 klatki => 0, -100, -200, -300 */
       }
 
       /* wybór wiersza (Y): 0%, -100%, -200% */
-      #enemy.row0 { background-position-y: 0%; }
-      #enemy.row1 { background-position-y: -100%; }
-      #enemy.row2 { background-position-y: -200%; }
+      #enemy.row0 {
+        background-position-y: 0%;
+      }
+      #enemy.row1 {
+        background-position-y: -100%;
+      }
+      #enemy.row2 {
+        background-position-y: -200%;
+      }
 
       /* proste "mruganie" gdy dostaniesz hita */
       #square.hurt {
@@ -152,9 +167,15 @@
       }
 
       @keyframes hurtBlink {
-        0% { opacity: 1; }
-        50% { opacity: 0.2; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.2;
+        }
+        100% {
+          opacity: 1;
+        }
       }
 
       /* Overlay (menu / game over) */
@@ -168,7 +189,9 @@
         background: rgba(0, 0, 0, 0.35);
       }
 
-      .overlay.hidden { display: none; }
+      .overlay.hidden {
+        display: none;
+      }
 
       .overlay-box {
         background: rgba(255, 255, 255, 0.95);
@@ -198,9 +221,21 @@
 
       /* animacja skarbu przy zebraniu */
       @keyframes pop {
-        0%   { transform: scale(1);   opacity: 1;   filter: brightness(1); }
-        40%  { transform: scale(1.35); opacity: 1;  filter: brightness(2); }
-        100% { transform: scale(0.6); opacity: 0;   filter: brightness(3); }
+        0% {
+          transform: scale(1);
+          opacity: 1;
+          filter: brightness(1);
+        }
+        40% {
+          transform: scale(1.35);
+          opacity: 1;
+          filter: brightness(2);
+        }
+        100% {
+          transform: scale(0.6);
+          opacity: 0;
+          filter: brightness(3);
+        }
       }
 
       #treasure.pop {
@@ -220,8 +255,6 @@
         opacity: 1;
         transition: opacity 60ms ease;
       }
-
-
     </style>
   </head>
 
@@ -242,7 +275,7 @@
         <div class="hud-right">
           <button id="restart-btn" type="button" title="Restart">⟲</button>
           <button id="mute-btn" type="button" title="Mute">🔇</button>
-	</div>
+        </div>
       </div>
 
       <!-- elementy gry -->
@@ -252,9 +285,9 @@
 
       <!-- Overlay na start/game over -->
       <div id="overlay" class="overlay">
-	<div class="overlay-box">
-	  <div id="overlay-title" class="overlay-title">Rycerz i Skarby</div>
-	  <div id="overlay-text" class="overlay-text">
+        <div class="overlay-box">
+          <div id="overlay-title" class="overlay-title">Pixel Przygoda</div>
+          <div id="overlay-text" class="overlay-text">
             Najedź rycerzem na START i wciśnij Enter.
           </div>
           <div class="overlay-hint">Enter = start / restart • M = mute</div>
@@ -265,6 +298,5 @@
 
     <audio id="bgm" src="/audio/bgm.mp3" loop preload="auto"></audio>
     <script type="module" src="./src/main.js"></script>
-
   </body>
 </html>
