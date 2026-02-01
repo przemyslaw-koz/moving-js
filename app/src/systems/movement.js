@@ -1,12 +1,28 @@
+export const measureMoveBounds = ({ containerEl, heroEl }) => {
+  if (!containerEl || !heroEl) {
+    return {
+      width: 0,
+      height: 0,
+      heroWidth: 0,
+      heroHeight: 0,
+    };
+  }
+
+  const containerRect = containerEl.getBoundingClientRect();
+  const heroRect = heroEl.getBoundingClientRect();
+
+  return {
+    width: containerRect.width,
+    height: containerRect.height,
+    heroWidth: heroRect.width,
+    heroHeight: heroRect.height,
+  };
+};
+
 export const tryMoveHero = ({ hero, bounds, dx = 0, dy = 0 }) => {
   if (!hero || !bounds) return false;
 
-  const {
-    width,
-    height,
-    heroWidth = 0,
-    heroHeight = 0,
-  } = bounds;
+  const { width, height, heroWidth = 0, heroHeight = 0 } = bounds;
 
   if (
     typeof width !== "number" ||

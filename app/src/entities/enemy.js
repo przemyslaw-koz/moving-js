@@ -1,6 +1,39 @@
-// entities/enemy.js
+// app/src/entities/enemy.js
 import { GAME_STATES } from "../state.js";
 import { hasCollision } from "../systems/collisions.js";
+
+export const initEnemy = (enemy) => {
+  enemy.frame = 0;
+  enemy.row = 0;
+  enemy.tick = 0;
+};
+
+/**
+ * row: wiersz spritesheet (np. 0 idle, 1 move)
+ * config:
+ *  - frameSize: px (szer./wys. klatki)
+ *  - framesPerRow: liczba klatek w wierszu
+ *  - tickModulo: co ile ticków zmieniać klatkę (im mniejsze, tym szybciej)
+ */
+export const renderEnemySprite = (
+  enemyEl,
+  enemy,
+  row,
+  { frameSize = 48, framesPerRow = 4, tickModulo = 3 } = {},
+) => {
+  if (!enemyEl) return;
+
+  enemy.row = row;
+
+  enemy.tick += 1;
+  if (enemy.tick % tickModulo === 0) {
+    enemy.frame = (enemy.frame + 1) % framesPerRow;
+  }
+
+  const x = -(enemy.frame * frameSize);
+  const y = -(enemy.row * frameSize);
+  enemyEl.style.backgroundPosition = `${x}px ${y}px`;
+};
 
 export const handleEnemyCollision = ({
   state,
