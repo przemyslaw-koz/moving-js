@@ -1,11 +1,11 @@
 import { getDom } from "./dom.js";
-import { createInitialState, GAME_STATES } from "./state.js";
+import { createInitialState, GAME_STATES, resetState } from "./state.js";
+import { renderHUD } from "./ui/hud.js";
 
+const dom = getDom();
 const {
   flashEl,
   treasureEl,
-  scoreEl,
-  livesEl,
   enemyEl,
   hudEl,
   containerEl,
@@ -17,13 +17,10 @@ const {
   overlayTextEl,
   restartBtn,
   muteBtn,
-} = getDom();
-
+} = dom;
 const state = createInitialState();
-
 const step = 10;
 
-//
 // Enemy state
 let enemyTimer = null;
 
@@ -58,10 +55,8 @@ function playTone({
   ensureAudio();
 
   const now = audioCtx.currentTime + at;
-
   const osc = audioCtx.createOscillator();
   const g = audioCtx.createGain();
-
   osc.type = type;
   osc.frequency.setValueAtTime(freq, now);
 
@@ -115,10 +110,6 @@ function playCoinSound() {
 }
 
 // ---- UI / STATE ----
-function renderHUD() {
-  if (livesEl) livesEl.textContent = "❤️".repeat(Math.max(0, state.lives));
-  if (scoreEl) scoreEl.textContent = state.score;
-}
 
 function showOverlay(title, text) {
   if (overlayTitleEl) overlayTitleEl.textContent = title;
@@ -225,12 +216,8 @@ function moveEnemyTick() {
 }
 
 function restartGame() {
-  // reset
-  state.lives = 3;
-  state.score = 0;
-  state.treasureCollecting = false;
-  state.gameState = GAME_STATES.PLAYING;
-  state.invincibleUntil = 0;
+  resetState(state);
+
   squareEl.classList.remove("hurt");
 
   enemy.frame = 0;
@@ -241,7 +228,7 @@ function restartGame() {
   hideOverlay();
   startBgm();
   playStartSound();
-  renderHUD();
+  renderHUD(state, dom);
 
   // treasure
   treasureEl.classList.add("hidden");
@@ -320,7 +307,7 @@ if (muteBtn) {
 }
 
 // Initial screen
-renderHUD();
+renderHUD(state, dom);
 showOverlay("Rycerz i Skarby", "Wciśnij Enter, aby zacząć.");
 
 document.addEventListener("keydown", (event) => {
@@ -460,7 +447,7 @@ const checkTreasureCollision = () => {
   if (isTreasureColliding(squareEl, treasureEl)) {
     state.treasureCollecting = true;
     state.score += 1;
-    renderHUD();
+    renderHUD(state, dom);
 
     playCoinSound();
 
@@ -504,7 +491,7 @@ function checkEnemyCollision() {
 
   if (isTreasureColliding(squareEl, enemyEl)) {
     state.lives -= 1;
-    renderHUD();
+    renderHUD(state, dom);
 
     // efekt: krótka nietykalność i mruganie
     state.invincibleUntil = Date.now() + 1000;

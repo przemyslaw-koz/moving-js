@@ -10,12 +10,12 @@ export const createInitialState = () => {
     score: 0,
     treasureCollecting: false,
     lives: 3,
-    invincibleUntil:0, //for enemy collision
+    invincibleUntil: 0, //for enemy collision
   };
 };
 
-export const resetState = (state) =>{
-const freshState=createInitialState();
-	Object.assign(state, freshState);
-	return state;
-}
+export const resetState = (state) => {
+  const freshState = createInitialState();
+  Object.assign(state, freshState);
+  return state;
+};
