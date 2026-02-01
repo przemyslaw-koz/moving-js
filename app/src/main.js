@@ -1,5 +1,5 @@
 import { getDom } from "./dom.js";
-import { createInitialState } from "./state.js";
+import { createInitialState, GAME_STATES } from "./state.js";
 
 const {
   flashEl,
@@ -170,7 +170,7 @@ function placeEnemyRandom() {
 function startEnemyLoop() {
   if (enemyTimer) clearInterval(enemyTimer);
   enemyTimer = setInterval(() => {
-    if (state.gameState !== "playing") return;
+    if (state.gameState !== GAME_STATES.PLAYING) return;
     moveEnemyTick();
     checkEnemyCollision();
   }, 50);
@@ -229,7 +229,7 @@ function restartGame() {
   state.lives = 3;
   state.score = 0;
   state.treasureCollecting = false;
-  state.gameState = "playing";
+  state.gameState = GAME_STATES.PLAYING;
   state.invincibleUntil = 0;
   squareEl.classList.remove("hurt");
 
@@ -261,7 +261,7 @@ function restartGame() {
 }
 
 function gameOver() {
-  state.gameState = "gameover";
+  state.gameState = GAME_STATES.GAMEOVER;
   state.treasureCollecting = true;
   stopBgm();
   stopEnemyLoop();
@@ -360,7 +360,10 @@ document.addEventListener("keydown", (event) => {
       bgImg = changeImage(hero)(bgImg);
       break;
     case "Enter":
-      if (state.gameState === "menu" || state.gameState === "gameover") {
+      if (
+        state.gameState === GAME_STATES.MENU ||
+        state.gameState === GAME_STATES.GAMEOVER
+      ) {
         restartGame();
       }
       break;
@@ -376,7 +379,7 @@ document.addEventListener("keydown", (event) => {
       break;
   }
 
-  if (state.gameState !== "playing") return;
+  if (state.gameState !== GAME_STATES.PLAYING) return;
 
   if (
     newX >= 0 &&
@@ -450,7 +453,7 @@ const isTreasureColliding = (a, b) => {
 };
 
 const checkTreasureCollision = () => {
-  if (state.gameState !== "playing") return;
+  if (state.gameState !== GAME_STATES.PLAYING) return;
   if (treasureEl.classList.contains("hidden")) return;
   if (state.treasureCollecting) return;
 
@@ -493,7 +496,7 @@ const treasureImages = [
 const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function checkEnemyCollision() {
-  if (state.gameState !== "playing") return;
+  if (state.gameState !== GAME_STATES.PLAYING) return;
   if (!enemyEl || enemyEl.classList.contains("invisible")) return;
 
   // i-frames po otrzymaniu hita
@@ -512,7 +515,7 @@ function checkEnemyCollision() {
     updateEnemySprite(2);
     setTimeout(() => {
       // wróć do "walk" jeśli gra nadal trwa
-      if (state.gameState === "playing") {
+      if (state.gameState === GAME_STATES.PLAYING) {
         updateEnemySprite(1);
       }
     }, 250);
@@ -521,7 +524,7 @@ function checkEnemyCollision() {
     flashEl.classList.add("on");
     setTimeout(() => flashEl.classList.remove("on"), 90);
 
-    if (lives <= 0) {
+    if (state.lives <= 0) {
       gameOver();
     }
   }
