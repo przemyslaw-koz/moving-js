@@ -1,22 +1,16 @@
 import { getDom } from "./dom.js";
 import { createInitialState, GAME_STATES, resetState } from "./state.js";
 import { renderHUD } from "./ui/hud.js";
-import { showOverlay } from "./ui/overlay.js";
+import { showOverlay, hideOverlay } from "./ui/overlay.js";
 import { bindHudButtons } from "./ui/buttons.js";
+import { playStartSound, playCoinSound } from "./audio/sfx.js";
+import { showTreasure, checkTreasureCollision } from "./entities/treasure.js";
+import { handleEnemyCollision } from "./entities/enemy.js";
+import { moveEnemyTick, placeEnemyRandom } from "./systems/enemyAI.js";
 
 const dom = getDom();
-const {
-  flashEl,
-  treasureEl,
-  enemyEl,
-  hudEl,
-  containerEl,
-  squareEl,
-  startBtn,
-  bgmEl,
-  restartBtn,
-  muteBtn,
-} = dom;
+const { flashEl, treasureEl, enemyEl, hudEl, containerEl, squareEl, bgmEl } =
+  dom;
 const state = createInitialState();
 const step = 10;
 
@@ -35,79 +29,6 @@ const enemy = {
 const ENEMY_FRAME_SIZE = 48; // px (taki jak #enemy width/height)
 const ENEMY_FRAMES_PER_ROW = 4;
 
-// ---- AUDIO ----
-let audioCtx = null;
-
-function ensureAudio() {
-  if (!audioCtx)
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") audioCtx.resume();
-}
-
-function playTone({
-  type = "square",
-  freq = 440,
-  duration = 0.12,
-  gain = 0.1,
-  at = 0,
-}) {
-  ensureAudio();
-
-  const now = audioCtx.currentTime + at;
-  const osc = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, now);
-
-  g.gain.setValueAtTime(0.0001, now);
-  g.gain.exponentialRampToValueAtTime(gain, now + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-  osc.connect(g);
-  g.connect(audioCtx.destination);
-
-  osc.start(now);
-  osc.stop(now + duration + 0.02);
-}
-
-function playStartSound() {
-  // mini fanfara: trzy szybkie nuty w górę
-  playTone({
-    type: "triangle",
-    freq: 523.25,
-    duration: 0.1,
-    gain: 0.12,
-    at: 0.0,
-  }); // C5
-  playTone({
-    type: "triangle",
-    freq: 659.25,
-    duration: 0.1,
-    gain: 0.12,
-    at: 0.11,
-  }); // E5
-  playTone({
-    type: "triangle",
-    freq: 783.99,
-    duration: 0.14,
-    gain: 0.12,
-    at: 0.22,
-  }); // G5
-}
-
-function playCoinSound() {
-  // klasyczny "coin": szybki skok w górę + drugi mały ding
-  playTone({ type: "square", freq: 880, duration: 0.1, gain: 0.12, at: 0.0 }); // A5
-  playTone({ type: "square", freq: 1320, duration: 0.08, gain: 0.1, at: 0.06 }); // E6
-  playTone({
-    type: "triangle",
-    freq: 660,
-    duration: 0.12,
-    gain: 0.08,
-    at: 0.1,
-  }); // E5
-}
-
 // ---- UI / STATE ----
 function startBgm() {
   if (!bgmEl) return;
@@ -121,37 +42,44 @@ function stopBgm() {
   bgmEl.currentTime = 0;
 }
 
-function getSafeTop() {
+const getSafeTop = () => {
   // obszar pod HUD, gdzie nie spawnujemy skarbów/potworów
   if (!hudEl) return 0;
   // hud jest wewnątrz kontenera i ma top:10px
   return hudEl.offsetTop + hudEl.offsetHeight + 10;
-}
-
-function placeEnemyRandom() {
-  if (!enemyEl) return;
-  const containerRect = containerEl.getBoundingClientRect();
-  const safeTop = getSafeTop();
-  const w = enemyEl.offsetWidth || 48;
-  const h = enemyEl.offsetHeight || 48;
-
-  const maxX = Math.max(0, containerRect.width - w);
-  const maxY = Math.max(0, containerRect.height - h);
-
-  enemy.x = Math.floor(Math.random() * maxX);
-  enemy.y = Math.floor(safeTop + Math.random() * Math.max(1, maxY - safeTop));
-
-  enemyEl.style.left = `${enemy.x}px`;
-  enemyEl.style.top = `${enemy.y}px`;
-  enemyEl.classList.remove("invisible");
-}
+};
 
 function startEnemyLoop() {
   if (enemyTimer) clearInterval(enemyTimer);
+
   enemyTimer = setInterval(() => {
     if (state.gameState !== GAME_STATES.PLAYING) return;
-    moveEnemyTick();
-    checkEnemyCollision();
+
+    moveEnemyTick({
+      dom,
+      enemy,
+      hero,
+      getSafeTop,
+      onAnimate: () => updateEnemySprite(1),
+    });
+
+    handleEnemyCollision({
+      state,
+      dom,
+      heroEl: squareEl,
+      onHit: () => {
+        renderHUD(state, dom);
+
+        squareEl.classList.add("hurt");
+        setTimeout(() => squareEl.classList.remove("hurt"), 1000);
+
+        if (flashEl) {
+          flashEl.classList.add("on");
+          setTimeout(() => flashEl.classList.remove("on"), 90);
+        }
+      },
+      onDeath: () => gameOver(),
+    });
   }, 50);
 }
 
@@ -177,32 +105,6 @@ function updateEnemySprite(row) {
   enemyEl.style.backgroundPosition = `${x}px ${y}px`;
 }
 
-function moveEnemyTick() {
-  if (!enemyEl) return;
-  const containerRect = containerEl.getBoundingClientRect();
-  const w = enemyEl.offsetWidth || 48;
-  const h = enemyEl.offsetHeight || 48;
-  const safeTop = getSafeTop();
-
-  // kierunek do gracza (hero.xPosition / hero.yPosition)
-  const dx = hero.xPosition - enemy.x;
-  const dy = hero.yPosition - enemy.y;
-  const len = Math.hypot(dx, dy) || 1;
-
-  enemy.x += (dx / len) * enemy.speed;
-  enemy.y += (dy / len) * enemy.speed;
-
-  // clamp do planszy + safeTop
-  enemy.x = Math.max(0, Math.min(enemy.x, containerRect.width - w));
-  enemy.y = Math.max(safeTop, Math.min(enemy.y, containerRect.height - h));
-
-  enemyEl.style.left = `${enemy.x}px`;
-  enemyEl.style.top = `${enemy.y}px`;
-
-  // w trakcie gonienia: wiersz 1 (walk)
-  updateEnemySprite(1);
-}
-
 function restartGame() {
   resetState(state);
   state.gameState = GAME_STATES.PLAYING;
@@ -221,10 +123,10 @@ function restartGame() {
 
   // treasure
   treasureEl.classList.add("hidden");
-  showTreasure();
+  showTreasure(state, dom, getSafeTop);
 
   // enemy
-  placeEnemyRandom();
+  placeEnemyRandom(enemy, dom, getSafeTop);
   // start: pokaż enemy + anim + wiersz "idle"
   if (enemyEl) {
     enemyEl.classList.remove("invisible");
@@ -354,7 +256,12 @@ document.addEventListener("keydown", (event) => {
     squareEl.style.top = hero.yPosition + "px";
   }
 
-  checkTreasureCollision();
+  checkTreasureCollision(state, dom, getSafeTop, {
+    onCollect: () => {
+      renderHUD(state, dom);
+      playCoinSound();
+    },
+  });
 });
 
 const animateMovement = (hero) => (direction) => {
@@ -379,114 +286,3 @@ const animateMovement = (hero) => (direction) => {
 
   return newHero;
 };
-
-const showTreasure = () => {
-  console.log("pokazał się skarb!");
-
-  const containerRect = containerEl.getBoundingClientRect();
-  const size = 32;
-  const safeTop = getSafeTop();
-
-  const maxX = containerRect.width - size;
-  const maxY = containerRect.height - size;
-
-  const x = Math.floor(Math.random() * maxX);
-  const y = Math.floor(safeTop + Math.random() * Math.max(1, maxY - safeTop));
-
-  const img = pickRandom(treasureImages);
-  treasureEl.style.backgroundImage = `url("${img}")`;
-  treasureEl.style.left = `${x}px`;
-  treasureEl.style.top = `${y}px`;
-  treasureEl.classList.remove("hidden");
-  state.treasureCollecting = false;
-};
-
-const isTreasureColliding = (a, b) => {
-  const r1 = a.getBoundingClientRect();
-  const r2 = b.getBoundingClientRect();
-
-  return !(
-    r1.right < r2.left ||
-    r1.left > r2.right ||
-    r1.bottom < r2.top ||
-    r1.top > r2.bottom
-  );
-};
-
-const checkTreasureCollision = () => {
-  if (state.gameState !== GAME_STATES.PLAYING) return;
-  if (treasureEl.classList.contains("hidden")) return;
-  if (state.treasureCollecting) return;
-
-  if (isTreasureColliding(squareEl, treasureEl)) {
-    state.treasureCollecting = true;
-    state.score += 1;
-    renderHUD(state, dom);
-
-    playCoinSound();
-
-    // błysk
-    flashEl.classList.add("on");
-    setTimeout(() => flashEl.classList.remove("on"), 70);
-
-    treasureEl.classList.remove("pop");
-    void treasureEl.offsetWidth; // reflow
-    treasureEl.classList.add("pop");
-
-    // po animacji: schowaj i pokaż nowy
-    setTimeout(() => {
-      treasureEl.classList.remove("pop");
-      treasureEl.classList.add("hidden");
-      showTreasure();
-    }, 180);
-
-    console.log("kolizja ze skarbem");
-  }
-};
-
-const treasureImages = [
-  "/img/gem1.png",
-  "/img/gem2.png",
-  "/img/gem3.png",
-  "/img/gem4.png",
-  "/img/gem5.png",
-  "/img/gem6.png",
-  "/img/gem7.png",
-];
-
-const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-function checkEnemyCollision() {
-  if (state.gameState !== GAME_STATES.PLAYING) return;
-  if (!enemyEl || enemyEl.classList.contains("invisible")) return;
-
-  // i-frames po otrzymaniu hita
-  if (Date.now() < state.invincibleUntil) return;
-
-  if (isTreasureColliding(squareEl, enemyEl)) {
-    state.lives -= 1;
-    renderHUD(state, dom);
-
-    // efekt: krótka nietykalność i mruganie
-    state.invincibleUntil = Date.now() + 1000;
-    squareEl.classList.add("hurt");
-    setTimeout(() => squareEl.classList.remove("hurt"), 1000);
-
-    // enemy "hurt" (wiersz 2) na moment
-    updateEnemySprite(2);
-    setTimeout(() => {
-      // wróć do "walk" jeśli gra nadal trwa
-      if (state.gameState === GAME_STATES.PLAYING) {
-        updateEnemySprite(1);
-      }
-    }, 250);
-
-    // błysk (ten sam co skarb)
-    flashEl.classList.add("on");
-    setTimeout(() => flashEl.classList.remove("on"), 90);
-
-    if (state.lives <= 0) {
-      gameOver();
-    }
-  }
-}

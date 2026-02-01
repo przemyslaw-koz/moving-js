@@ -1,9 +1,9 @@
 export const showOverlay = (dom, title, text) => {
-  if (overlayTitleEl) dom.overlayTitleEl.textContent = title;
-  if (overlayTextEl) dom.overlayTextEl.textContent = text;
-  if (overlayEl) dom.overlayEl.classList.remove("hidden");
+  if (dom.overlayTitleEl) dom.overlayTitleEl.textContent = title;
+  if (dom.overlayTextEl) dom.overlayTextEl.textContent = text;
+  if (dom.overlayEl) dom.overlayEl.classList.remove("hidden");
 };
 
 export const hideOverlay = (dom) => {
-  if (overlayEl) dom.overlayEl.classList.add("hidden");
+  if (dom.overlayEl) dom.overlayEl.classList.add("hidden");
 };
