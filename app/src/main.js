@@ -1,5 +1,3 @@
-//main.js
-
 import { getDom } from "./dom.js";
 
 const {
