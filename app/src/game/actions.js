@@ -1,4 +1,3 @@
-// app/src/game/actions.js
 import { GAME_STATES, resetState } from "../state.js";
 import { renderHUD } from "../ui/hud.js";
 import { showOverlay, hideOverlay } from "../ui/overlay.js";
@@ -18,9 +17,6 @@ import {
   stepHeroAnimation,
 } from "../entities/hero.js";
 
-/**
- * actions to “API gry”: main tylko woła te funkcje.
- */
 export const createGameActions = ({ ctx, gameLoop }) => {
   const { dom, state, hero, enemy, enemySprite, getSafeTop } = ctx;
   const { treasureEl, enemyEl, squareEl, containerEl, bgmEl } = dom;
@@ -30,11 +26,9 @@ export const createGameActions = ({ ctx, gameLoop }) => {
   const handleMove = (action) => {
     if (state.gameState !== GAME_STATES.PLAYING) return;
 
-    // sprite anim
     stepHeroAnimation(hero, action.dir);
     renderHeroSprite(squareEl, hero, heroSpriteCache);
 
-    // movement bounds (wydzielone do movement.js)
     const bounds = measureMoveBounds({
       containerEl,
       heroEl: squareEl,

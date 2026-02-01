@@ -41,7 +41,6 @@ const ctx = createContext({
   step,
 });
 
-// actions potrzebujemy zanim zbudujemy tick (tick woła gameOver)
 let actions;
 
 const tick = createTick({
@@ -62,13 +61,11 @@ const gameLoop = createGameLoop({
 
 actions = createGameActions({ ctx, gameLoop });
 
-// HUD buttons
 bindHudButtons(dom, {
   onRestart: () => actions.restart(),
   onToggleMute: () => actions.handleAction({ type: "TOGGLE_MUTE" }),
 });
 
-// Initial screen
 renderHUD(state, dom);
 showOverlay(dom, "Pixel Przygoda", "Wciśnij Enter, aby zacząć.");
 
