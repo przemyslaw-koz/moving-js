@@ -55,6 +55,7 @@ export const renderHeroSprite = (heroEl, hero, cache) => {
 
 export const renderHeroPosition = (heroEl, hero) => {
   if (!heroEl) return;
+
   heroEl.style.left = `${hero.xPosition}px`;
   heroEl.style.top = `${hero.yPosition}px`;
 };

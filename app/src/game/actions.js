@@ -30,6 +30,7 @@ export const createGameActions = ({ ctx, gameLoop }) => {
     const bounds = measureMoveBounds({
       containerEl,
       heroEl: squareEl,
+      safeTop: getSafeTop(),
     });
 
     const moved = tryMoveHero({
@@ -80,6 +81,9 @@ export const createGameActions = ({ ctx, gameLoop }) => {
     audio.playStart();
     renderHUD(state, dom);
 
+    hero.yPosition = Math.max(hero.yPosition, getSafeTop());
+    renderHeroPosition(squareEl, hero);
+
     treasureEl.classList.add("hidden");
     showTreasure(state, dom, getSafeTop);
 
@@ -102,6 +106,19 @@ export const createGameActions = ({ ctx, gameLoop }) => {
     showOverlay(dom, "GAME OVER", `Wynik: ${state.score}. Enter = restart`);
   };
 
+  const togglePause = () => {
+    if (state.gameState === GAME_STATES.PLAYING) {
+      state.gameState = GAME_STATES.PAUSED;
+      showOverlay(dom, "PAUSED", "Spacja / P = wznów");
+      return;
+    }
+
+    if (state.gameState === GAME_STATES.PAUSED) {
+      state.gameState = GAME_STATES.PLAYING;
+      hideOverlay(dom);
+    }
+  };
+
   const handleAction = (action) => {
     if (handleAudio(action)) return;
 
@@ -112,10 +129,13 @@ export const createGameActions = ({ ctx, gameLoop }) => {
       case INPUT_ACTIONS.MOVE:
         handleMove(action);
         return;
+      case INPUT_ACTIONS.PAUSE:
+        togglePause();
+        return;
       default:
         return;
     }
   };
 
-  return { restart, gameOver, handleAction };
+  return { restart, gameOver, handleAction, togglePause };
 };

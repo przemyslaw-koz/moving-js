@@ -1,4 +1,4 @@
-import { playTone } from "./audio.js";
+import { playTone, playThud, playNoiseBurst } from "./audio.js";
 
 export const playStartSound = () => {
   playTone({
@@ -37,6 +37,25 @@ export const playCoinSound = () => {
 };
 
 export const playHit = () => {
-  playTone({ type: "square", freq: 180, duration: 0.08, gain: 0.12 });
-  playTone({ type: "square", freq: 120, duration: 0.1, gain: 0.1, at: 0.06 });
+  playTone({ type: "square", freq: 180, duration: 0.08, gain: 0.42 });
+  playTone({ type: "square", freq: 120, duration: 0.1, gain: 0.42, at: 0.06 });
+};
+
+export const playHitNew = () => {
+  playThud({
+    type: "sine",
+    fromFreq: 220,
+    toFreq: 70,
+    duration: 0.09,
+    gain: 0.72,
+  });
+  playNoiseBurst({ duration: 0.07, gain: 0.7, at: 0.0, lowpass: 1600 });
+  playThud({
+    type: "triangle",
+    fromFreq: 140,
+    toFreq: 90,
+    duration: 0.06,
+    gain: 0.7,
+    at: 0.06,
+  });
 };

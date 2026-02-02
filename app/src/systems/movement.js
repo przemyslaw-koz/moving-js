@@ -1,28 +1,32 @@
-export const measureMoveBounds = ({ containerEl, heroEl }) => {
+export const measureMoveBounds = ({ containerEl, heroEl, safeTop = 0 }) => {
   if (!containerEl || !heroEl) {
     return {
       width: 0,
       height: 0,
       heroWidth: 0,
       heroHeight: 0,
+      safeTop: 0,
     };
   }
 
-  const containerRect = containerEl.getBoundingClientRect();
   const heroRect = heroEl.getBoundingClientRect();
 
+  const playWidth = containerEl.clientWidth;
+  const playHeight = containerEl.clientHeight;
+
   return {
-    width: containerRect.width,
-    height: containerRect.height,
+    width: playWidth,
+    height: playHeight,
     heroWidth: heroRect.width,
     heroHeight: heroRect.height,
+    safeTop: Math.max(0, safeTop),
   };
 };
 
 export const tryMoveHero = ({ hero, bounds, dx = 0, dy = 0 }) => {
   if (!hero || !bounds) return false;
 
-  const { width, height, heroWidth = 0, heroHeight = 0 } = bounds;
+  const { width, height, heroWidth = 0, heroHeight = 0, safeTop = 0 } = bounds;
 
   if (
     typeof width !== "number" ||
@@ -37,7 +41,7 @@ export const tryMoveHero = ({ hero, bounds, dx = 0, dy = 0 }) => {
   const nextY = hero.yPosition + dy;
 
   const minX = 0;
-  const minY = 0;
+  const minY = Math.max(0, safeTop);
   const maxX = Math.max(0, width - heroWidth);
   const maxY = Math.max(0, height - heroHeight);
 

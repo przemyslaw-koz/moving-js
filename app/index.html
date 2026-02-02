@@ -6,13 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pixel Przygoda</title>
     <style>
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        overflow: hidden; /* ✅ blokuje scroll */
+        margin: 0;
+
+        /* Step 1: tło strony = powtarzające się leśne kafelki */
+        background-image: url("./img/ui/forest_tile.png");
+        background-repeat: repeat;
+        background-position: top left;
+        background-size: 32px 32px;
+
+        /* Pixel art bez rozmycia */
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
       #container {
         width: calc(100vw - 60px);
         height: calc(100vh - 60px);
-        border: 2px solid black;
+
         position: relative;
         margin: 20px;
         overflow: hidden;
+
+        box-sizing: border-box;
+
+        /* --- Step 2: arena frame (9-slice z 48x48, slice=16) --- */
+        border: 32px solid transparent; /* grubość ramki = 16px */
+        border-image-source: url("./img/ui/arena_frame2.png");
+        border-image-slice: 16; /* rogi 16x16 */
+        border-image-repeat: round; /* krawędzie się ładnie powielą */
+
+        /* --- Step 2: pole gry = powielane klepisko --- */
+        background-image: url("./img/ui/dirt_tile.png");
+        background-repeat: repeat;
+        background-position: top left;
+
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
 
       #square {
@@ -127,16 +167,12 @@
 
         background-image: url(/img/slime_green.png);
         background-repeat: no-repeat;
-
-        /* sprite-sheet ma 4 kolumny i 3 wiersze:
-         więc rozmiar tła = 4x szerokość elementu i 3x wysokość elementu */
         background-size: 400% 300%;
 
         image-rendering: pixelated;
         z-index: 1;
       }
 
-      /* animacja: przesuwamy X po 4 klatkach (0..3) */
       #enemy.anim {
         animation: enemyWalk 0.6s steps(4) infinite;
       }
@@ -147,7 +183,7 @@
         }
         to {
           background-position-x: -300%;
-        } /* 4 klatki => 0, -100, -200, -300 */
+        }
       }
 
       /* wybór wiersza (Y): 0%, -100%, -200% */
@@ -178,7 +214,6 @@
         }
       }
 
-      /* Overlay (menu / game over) */
       .overlay {
         position: absolute;
         inset: 0;
@@ -219,7 +254,6 @@
         margin-bottom: 12px;
       }
 
-      /* animacja skarbu przy zebraniu */
       @keyframes pop {
         0% {
           transform: scale(1);
@@ -254,6 +288,31 @@
       #flash.on {
         opacity: 1;
         transition: opacity 60ms ease;
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(-6px, 4px);
+        }
+        40% {
+          transform: translate(5px, -3px);
+        }
+        60% {
+          transform: translate(-4px, -5px);
+        }
+        80% {
+          transform: translate(6px, 3px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+
+      .shake {
+        animation: shake 180ms linear;
       }
     </style>
   </head>

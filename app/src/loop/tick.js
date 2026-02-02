@@ -4,6 +4,9 @@ import { renderHUD } from "../ui/hud.js";
 import { checkTreasureCollision } from "../entities/treasure.js";
 import { measureMoveBounds } from "../systems/movement.js";
 import { applyKnockback } from "../systems/knockback.js";
+import { shakeGame } from "../ui/effects.js";
+import { renderHeroPosition } from "../entities/hero.js";
+import { applyDifficulty } from "../systems/difficulty.js";
 
 export const createTick = ({
   dom,
@@ -21,6 +24,7 @@ export const createTick = ({
   const flashHitFx = () => {
     onEnemyHit?.();
     renderHUD(state, dom);
+    shakeGame(dom, { ms: 180 });
 
     squareEl.classList.add("hurt");
     setTimeout(() => squareEl.classList.remove("hurt"), 1000);
@@ -37,14 +41,20 @@ export const createTick = ({
         enemy,
         bounds,
         safeTop: getSafeTop(),
-        distance: 100,//TODO: check live and decide how much is needed
+        distance: 100, //TODO: check live and decide how much is needed
       });
-      squareEl.style.left = `${hero.xPosition}px`;
-      squareEl.style.top = `${hero.yPosition}px`;
+      renderHeroPosition(squareEl, hero);
     }
   };
 
   return () => {
+    applyDifficulty(state, enemy, {
+      baseSpeed: 3,
+      stepEvery: 5,
+      speedInc: 0.5,
+      maxSpeed: 7,
+    });
+
     moveEnemyTick({
       dom,
       enemy,

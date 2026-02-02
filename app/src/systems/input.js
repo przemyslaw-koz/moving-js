@@ -4,6 +4,7 @@ export const INPUT_ACTIONS = {
   TOGGLE_MUTE: "toggle_mute",
   VOLUME_UP: "volume_up",
   VOLUME_DOWN: "volume_down",
+  PAUSE: "pause",
 };
 
 export const keyToAction = (key, step = 10) => {
@@ -29,6 +30,11 @@ export const keyToAction = (key, step = 10) => {
 
     case "-":
       return { type: INPUT_ACTIONS.VOLUME_DOWN };
+
+    case "P":
+    case "p":
+    case " ":
+      return { type: INPUT_ACTIONS.PAUSE };
 
     default:
       return null;

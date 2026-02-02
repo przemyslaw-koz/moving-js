@@ -17,12 +17,13 @@ export const showTreasure = (state, dom, getSafeTop) => {
   const { containerEl, treasureEl } = dom;
   if (!containerEl || !treasureEl) return;
 
-  const containerRect = containerEl.getBoundingClientRect();
+  const playW = containerEl.clientWidth;
+  const playH = containerEl.clientHeight;
   const size = 32;
   const safeTop = getSafeTop();
 
-  const maxX = containerRect.width - size;
-  const maxY = containerRect.height - size;
+  const maxX = playW - size;
+  const maxY = playH - size;
 
   const x = Math.floor(Math.random() * maxX);
   const y = Math.floor(safeTop + Math.random() * Math.max(1, maxY - safeTop));
