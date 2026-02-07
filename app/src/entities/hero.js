@@ -6,7 +6,6 @@ export const createHero = ({
 } = {}) => ({ xPosition, yPosition, step, direction });
 
 export const stepHeroAnimation = (hero, dir) => {
-  // bazujemy na Twojej obecnej logice
   if (dir === "u" || dir === "d") {
     hero.step = hero.step === 7 ? 1 : hero.step + 1;
     return;
@@ -22,8 +21,6 @@ export const stepHeroAnimation = (hero, dir) => {
 };
 
 const getAssetDirFromBg = (currentBg) => {
-  // currentBg: url(".../knight1-r.png") lub url(...).
-  // bezpiecznie: wyciągamy ścieżkę bazową (folder).
   const raw = currentBg.startsWith('url("')
     ? currentBg.slice(5, -2)
     : currentBg.startsWith("url(")
@@ -37,7 +34,6 @@ const getAssetDirFromBg = (currentBg) => {
 export const renderHeroSprite = (heroEl, hero, cache) => {
   if (!heroEl) return;
 
-  // cache trzyma: { baseDir, lastBg }
   if (!cache.baseDir) {
     const currentBg = window.getComputedStyle(heroEl).backgroundImage;
     cache.baseDir = getAssetDirFromBg(currentBg);
@@ -46,7 +42,6 @@ export const renderHeroSprite = (heroEl, hero, cache) => {
   const newImageName = `knight${hero.step}-${hero.direction}.png`;
   const newBg = `url("${cache.baseDir}/${newImageName}")`;
 
-  // minimalny micro-opt: nie ustawiaj style jeśli nie trzeba
   if (cache.lastBg !== newBg) {
     heroEl.style.backgroundImage = newBg;
     cache.lastBg = newBg;

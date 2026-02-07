@@ -1,35 +1,40 @@
 let score = 0;
 let treasureCollecting = false;
 let lives = 3;
-let gameState = "menu"; // "menu" | "playing" | "gameover"
+let gameState = "menu";
 
 const step = 10;
 
-//
-// Enemy state
 let enemyTimer = null;
-let invincibleUntil = 0; // timestamp (ms)
+let invincibleUntil = 0;
 const enemy = {
   x: 300,
   y: 200,
-  speed: 3, // px per tick (50ms) ~ 60px/s
-  frame: 0,   // 0..3
-  row: 0,     // 0..2 (wiersz w spritesheet)
-  tick: 0,    // do animacji (spowolnienie klatek)
+  speed: 3,
+  frame: 0,
+  row: 0,
+  tick: 0,
 };
 
-const ENEMY_FRAME_SIZE = 48; // px (taki jak #enemy width/height)
+const ENEMY_FRAME_SIZE = 48;
 const ENEMY_FRAMES_PER_ROW = 4;
 
 // ---- AUDIO ----
 let audioCtx = null;
 
 function ensureAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx)
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-function playTone({ type = "square", freq = 440, duration = 0.12, gain = 0.1, at = 0 }) {
+function playTone({
+  type = "square",
+  freq = 440,
+  duration = 0.12,
+  gain = 0.1,
+  at = 0,
+}) {
   ensureAudio();
 
   const now = audioCtx.currentTime + at;
@@ -52,17 +57,39 @@ function playTone({ type = "square", freq = 440, duration = 0.12, gain = 0.1, at
 }
 
 function playStartSound() {
-  // mini fanfara: trzy szybkie nuty w górę
-  playTone({ type: "triangle", freq: 523.25, duration: 0.10, gain: 0.12, at: 0.00 }); // C5
-  playTone({ type: "triangle", freq: 659.25, duration: 0.10, gain: 0.12, at: 0.11 }); // E5
-  playTone({ type: "triangle", freq: 783.99, duration: 0.14, gain: 0.12, at: 0.22 }); // G5
+  playTone({
+    type: "triangle",
+    freq: 523.25,
+    duration: 0.1,
+    gain: 0.12,
+    at: 0.0,
+  }); // C5
+  playTone({
+    type: "triangle",
+    freq: 659.25,
+    duration: 0.1,
+    gain: 0.12,
+    at: 0.11,
+  }); // E5
+  playTone({
+    type: "triangle",
+    freq: 783.99,
+    duration: 0.14,
+    gain: 0.12,
+    at: 0.22,
+  }); // G5
 }
 
 function playCoinSound() {
-  // klasyczny "coin": szybki skok w górę + drugi mały ding
-  playTone({ type: "square", freq: 880, duration: 0.10, gain: 0.12, at: 0.00 });  // A5
-  playTone({ type: "square", freq: 1320, duration: 0.08, gain: 0.10, at: 0.06 }); // E6
-  playTone({ type: "triangle", freq: 660, duration: 0.12, gain: 0.08, at: 0.10 }); // E5
+  playTone({ type: "square", freq: 880, duration: 0.1, gain: 0.12, at: 0.0 }); // A5
+  playTone({ type: "square", freq: 1320, duration: 0.08, gain: 0.1, at: 0.06 }); // E6
+  playTone({
+    type: "triangle",
+    freq: 660,
+    duration: 0.12,
+    gain: 0.08,
+    at: 0.1,
+  }); // E5
 }
 
 // ---- UI / STATE ----
@@ -94,9 +121,7 @@ function stopBgm() {
 }
 
 function getSafeTop() {
-  // obszar pod HUD, gdzie nie spawnujemy skarbów/potworów
   if (!hudEl) return 0;
-  // hud jest wewnątrz kontenera i ma top:10px
   return hudEl.offsetTop + hudEl.offsetHeight + 10;
 }
 
@@ -111,7 +136,7 @@ function placeEnemyRandom() {
   const maxY = Math.max(0, containerRect.height - h);
 
   enemy.x = Math.floor(Math.random() * maxX);
-  enemy.y = Math.floor(safeTop + Math.random() * Math.max(1, (maxY - safeTop)));
+  enemy.y = Math.floor(safeTop + Math.random() * Math.max(1, maxY - safeTop));
 
   enemyEl.style.left = `${enemy.x}px`;
   enemyEl.style.top = `${enemy.y}px`;
@@ -137,9 +162,8 @@ function updateEnemySprite(row) {
   if (!enemyEl) return;
   enemy.row = row;
 
-  // animacja co kilka ticków, żeby nie "mieliło" za szybko
   enemy.tick += 1;
-  if (enemy.tick % 3 === 0) { // zmień 3 -> 2 (szybciej) lub 4 (wolniej)
+  if (enemy.tick % 3 === 0) {
     enemy.frame = (enemy.frame + 1) % ENEMY_FRAMES_PER_ROW;
   }
 
@@ -148,7 +172,6 @@ function updateEnemySprite(row) {
   enemyEl.style.backgroundPosition = `${x}px ${y}px`;
 }
 
-
 function moveEnemyTick() {
   if (!enemyEl) return;
   const containerRect = container.getBoundingClientRect();
@@ -156,7 +179,6 @@ function moveEnemyTick() {
   const h = enemyEl.offsetHeight || 48;
   const safeTop = getSafeTop();
 
-  // kierunek do gracza (hero.xPosition / hero.yPosition)
   const dx = hero.xPosition - enemy.x;
   const dy = hero.yPosition - enemy.y;
   const len = Math.hypot(dx, dy) || 1;
@@ -164,20 +186,16 @@ function moveEnemyTick() {
   enemy.x += (dx / len) * enemy.speed;
   enemy.y += (dy / len) * enemy.speed;
 
-  // clamp do planszy + safeTop
   enemy.x = Math.max(0, Math.min(enemy.x, containerRect.width - w));
   enemy.y = Math.max(safeTop, Math.min(enemy.y, containerRect.height - h));
 
   enemyEl.style.left = `${enemy.x}px`;
   enemyEl.style.top = `${enemy.y}px`;
 
-  // w trakcie gonienia: wiersz 1 (walk)
   updateEnemySprite(1);
 }
 
-
 function restartGame() {
-  // reset
   lives = 3;
   score = 0;
   treasureCollecting = false;
@@ -185,29 +203,25 @@ function restartGame() {
   invincibleUntil = 0;
   square.classList.remove("hurt");
 
- enemy.frame = 0;
+  enemy.frame = 0;
   enemy.row = 0;
   enemy.tick = 0;
 
-  // UI + audio
   hideOverlay();
   startBgm();
   playStartSound();
   renderHUD();
 
-  // treasure
   treasureEl.classList.add("hidden");
   showTreasure();
 
-  // enemy
   placeEnemyRandom();
-  // start: pokaż enemy + anim + wiersz "idle"
+
   if (enemyEl) {
     enemyEl.classList.remove("invisible");
 
-    // nie używamy już klas anim/rowX — jedziemy po backgroundPosition w px
     enemyEl.style.backgroundPosition = `0px 0px`;
-    enemyEl.style.outline = ""; // jeśli miałeś debug outline, usuń
+    enemyEl.style.outline = "";
   }
   startEnemyLoop();
 }
@@ -219,7 +233,6 @@ function gameOver() {
   stopEnemyLoop();
   showOverlay("GAME OVER", `Wynik: ${score}. Enter = restart`);
 }
-
 
 const hero = {
   xPosition: 100,
@@ -234,7 +247,7 @@ let isButtonActive = false;
 const changeImage = (hero) => (currentBackgroundImage) => {
   const imageUrl = currentBackgroundImage.substring(
     5,
-    currentBackgroundImage.length - 2
+    currentBackgroundImage.length - 2,
   );
 
   const parts = imageUrl.split("/");
@@ -275,7 +288,6 @@ if (muteBtn) {
 // Initial screen
 renderHUD();
 showOverlay("Pixel Przygoda", "Wciśnij Enter, aby zacząć.");
-
 
 document.addEventListener("keydown", (event) => {
   let newX = hero.xPosition;
@@ -372,7 +384,7 @@ const animateMovement = (hero) => (direction) => {
 
 const showTreasure = () => {
   console.log("pokazał się skarb!");
-  
+
   const containerRect = container.getBoundingClientRect();
   const size = 32;
   const safeTop = getSafeTop();
@@ -381,7 +393,7 @@ const showTreasure = () => {
   const maxY = containerRect.height - size;
 
   const x = Math.floor(Math.random() * maxX);
-  const y = Math.floor(safeTop + Math.random() * Math.max(1, (maxY - safeTop)));
+  const y = Math.floor(safeTop + Math.random() * Math.max(1, maxY - safeTop));
 
   const img = pickRandom(treasureImages);
   treasureEl.style.backgroundImage = `url("${img}")`;
@@ -389,8 +401,7 @@ const showTreasure = () => {
   treasureEl.style.top = `${y}px`;
   treasureEl.classList.remove("hidden");
   treasureCollecting = false;
-
-}
+};
 
 const isTreasureColliding = (a, b) => {
   const r1 = a.getBoundingClientRect();
@@ -402,7 +413,7 @@ const isTreasureColliding = (a, b) => {
     r1.bottom < r2.top ||
     r1.top > r2.bottom
   );
-}
+};
 
 const checkTreasureCollision = () => {
   if (gameState !== "playing") return;
@@ -412,11 +423,10 @@ const checkTreasureCollision = () => {
   if (isTreasureColliding(square, treasureEl)) {
     treasureCollecting = true;
     score += 1;
-    renderHUD();	
+    renderHUD();
 
     playCoinSound();
 
-    // błysk
     flashEl.classList.add("on");
     setTimeout(() => flashEl.classList.remove("on"), 70);
 
@@ -424,7 +434,6 @@ const checkTreasureCollision = () => {
     void treasureEl.offsetWidth; // reflow
     treasureEl.classList.add("pop");
 
-    // po animacji: schowaj i pokaż nowy
     setTimeout(() => {
       treasureEl.classList.remove("pop");
       treasureEl.classList.add("hidden");
@@ -451,28 +460,23 @@ function checkEnemyCollision() {
   if (gameState !== "playing") return;
   if (!enemyEl || enemyEl.classList.contains("invisible")) return;
 
-  // i-frames po otrzymaniu hita
   if (Date.now() < invincibleUntil) return;
 
   if (isTreasureColliding(square, enemyEl)) {
     lives -= 1;
     renderHUD();
 
-    // efekt: krótka nietykalność i mruganie
     invincibleUntil = Date.now() + 1000;
     square.classList.add("hurt");
     setTimeout(() => square.classList.remove("hurt"), 1000);
 
-    // enemy "hurt" (wiersz 2) na moment
     updateEnemySprite(2);
     setTimeout(() => {
-      // wróć do "walk" jeśli gra nadal trwa
       if (gameState === "playing") {
         updateEnemySprite(1);
       }
     }, 250);
 
-    // błysk (ten sam co skarb)
     flashEl.classList.add("on");
     setTimeout(() => flashEl.classList.remove("on"), 90);
 

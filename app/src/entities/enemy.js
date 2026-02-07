@@ -1,4 +1,3 @@
-// app/src/entities/enemy.js
 import { GAME_STATES } from "../state.js";
 import { hasCollision } from "../systems/collisions.js";
 

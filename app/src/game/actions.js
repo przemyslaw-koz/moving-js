@@ -68,7 +68,6 @@ export const createGameActions = ({ ctx, gameLoop }) => {
     }
   };
 
-  // --- core actions
   const restart = () => {
     resetState(state);
     state.gameState = GAME_STATES.PLAYING;

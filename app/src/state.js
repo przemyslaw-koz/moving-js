@@ -11,7 +11,7 @@ export const createInitialState = () => {
     score: 0,
     treasureCollecting: false,
     lives: 3,
-    invincibleUntil: 0, //for enemy collision
+    invincibleUntil: 0,
   };
 };
 

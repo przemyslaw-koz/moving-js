@@ -30,7 +30,6 @@ export const moveEnemyTick = ({ dom, enemy, hero, getSafeTop, onAnimate }) => {
   const w = enemyEl.offsetWidth || 48;
   const h = enemyEl.offsetHeight || 48;
 
-  //follow hero
   const dx = hero.xPosition - enemy.x;
   const dy = hero.yPosition - enemy.y;
   const len = Math.hypot(dx, dy) || 1;
@@ -38,7 +37,6 @@ export const moveEnemyTick = ({ dom, enemy, hero, getSafeTop, onAnimate }) => {
   enemy.x += (dx / len) * enemy.speed;
   enemy.y += (dy / len) * enemy.speed;
 
-  // clamp
   enemy.x = Math.max(0, Math.min(enemy.x, playW - w));
   enemy.y = Math.max(safeTop, Math.min(enemy.y, playH - h));
 

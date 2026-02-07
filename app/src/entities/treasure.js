@@ -1,4 +1,3 @@
-// app/src/entities/treasure.js
 import { pickRandom } from "../utils/random.js";
 import { isOverlapping } from "../utils/rect.js";
 import { GAME_STATES } from "../state.js";
@@ -51,7 +50,6 @@ export const checkTreasureCollision = (
 
   if (!isOverlapping(squareEl, treasureEl)) return false;
 
-  // collision happened
   state.treasureCollecting = true;
   state.score += 1;
 

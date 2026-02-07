@@ -15,7 +15,6 @@ export const applyKnockback = ({
   hero.xPosition += nx * distance;
   hero.yPosition += ny * distance;
 
-  // clamp
   const maxX = Math.max(0, bounds.width - bounds.heroWidth);
   const maxY = Math.max(safeTop, bounds.height - bounds.heroHeight);
 

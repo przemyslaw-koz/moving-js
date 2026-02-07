@@ -3,7 +3,6 @@ export const shakeGame = (dom, { ms = 180 } = {}) => {
   if (!containerEl) return;
 
   containerEl.classList.remove("shake");
-  // restart animacji
   void containerEl.offsetWidth;
   containerEl.classList.add("shake");
 
