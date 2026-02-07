@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./app
+    container_name: moving-js-dev
+    ports:
+      - "8088:80"
+    restart: unless-stopped
+    volumes:
+      - ./app:/usr/share/nginx/html:ro
